@@ -14,20 +14,43 @@ async function getGithubRepos(): Promise<Repo[]> {
   }
 
   try {
-    const response = await fetch('https://api.github.com/user/repos?sort=pushed&per_page=6&type=public', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    // 1. Fetch the list of repositories
+    const repoResponse = await fetch('https://api.github.com/user/repos?sort=pushed&per_page=6&type=public', {
+      headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 3600 }, // Cache for 1 hour
     });
 
-    if (!response.ok) {
-      console.error('GitHub API request failed:', response.statusText);
+    if (!repoResponse.ok) {
+      console.error('GitHub API request for repos failed:', repoResponse.statusText);
       return [];
     }
 
-    const data = await response.json();
-    return data as Repo[];
+    let repos: Repo[] = await repoResponse.json();
+
+    // 2. Fetch languages for each repository concurrently
+    const languagePromises = repos.map(repo => 
+      fetch(repo.languages_url, { 
+        headers: { Authorization: `Bearer ${token}` },
+        next: { revalidate: 3600 },
+      }).then(res => {
+        if (!res.ok) {
+          console.error(`Failed to fetch languages for ${repo.name}:`, res.statusText);
+          return {}; // Return empty object on failure
+        }
+        return res.json();
+      })
+    );
+
+    const languagesPerRepo = await Promise.all(languagePromises);
+
+    // 3. Attach language data to each repo object
+    repos = repos.map((repo, index) => ({
+      ...repo,
+      languages: languagesPerRepo[index],
+    }));
+
+    return repos;
+
   } catch (error) {
     console.error('Failed to fetch GitHub repos:', error);
     return [];
