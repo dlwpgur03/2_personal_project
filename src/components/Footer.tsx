@@ -12,7 +12,7 @@ const Footer = () => {
             </a>
         </div>
         <p className="text-gray-500">
-          &copy; {new Date().getFullYear()} Your Name Here. All Rights Reserved.
+          &copy; {new Date().getFullYear()} Leejehyuk. All Rights Reserved.
         </p>
       </div>
     </footer>
