@@ -4,6 +4,7 @@ import AnimatedSection from './AnimatedSection';
 import { GitHubLogoIcon, StarIcon } from '@radix-ui/react-icons';
 import type { Repo } from '@/types';
 
+import VercelIcon from './VercelIcon';
 import LanguageChart, { COLORS } from './LanguageChart';
 
 interface ProjectsProps {
@@ -43,17 +44,18 @@ const Projects = ({ repos }: ProjectsProps) => {
         {repos && repos.length > 0 ? (
           <div className="space-y-12 max-w-4xl mx-auto">
             {repos.map((repo) => (
-              <a 
+              <div 
                 key={repo.id} 
-                href={repo.html_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
                 className="block bg-gray-800 rounded-lg p-8 shadow-lg hover:bg-gray-700 transition-colors duration-300"
               >
                 <div className="flex flex-col md:flex-row gap-8 md:items-center">
                   {/* Left Side: Text Info */}
                   <div className="flex-grow text-left">
-                    <h3 className="text-2xl font-bold text-blue-400 mb-2">{repo.name}</h3>
+                    <h3 className="text-2xl font-bold text-blue-400 mb-2">
+                      <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
+                        {repo.name}
+                      </a>
+                    </h3>
                     <p className="text-gray-300 mb-4 h-12 overflow-hidden">{repo.description || "No description provided."}</p>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-4">
@@ -65,8 +67,15 @@ const Projects = ({ repos }: ProjectsProps) => {
                           <span>{repo.stargazers_count}</span>
                         </div>
                       </div>
-                      <div className="text-gray-400 hover:text-white transition-colors">
-                        <GitHubLogoIcon className="w-6 h-6" />
+                      <div className="flex items-center gap-4">
+                        {repo.homepage && (
+                          <a href={repo.homepage} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                            <VercelIcon className="w-6 h-6" />
+                          </a>
+                        )}
+                        <a href={repo.html_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                          <GitHubLogoIcon className="w-6 h-6" />
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -77,7 +86,7 @@ const Projects = ({ repos }: ProjectsProps) => {
                     <LanguageStats languages={repo.languages || {}} />
                   </div>
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         ) : (
